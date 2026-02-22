@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-solar-gold: #F4C430;
+  --color-solar-gold-hover: #E6A817;
+  --color-charcoal: #0E1116;
+  --color-steel-grey: #1F2937;
+  --color-main-bg: #F7F8FA;
+  
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-main-bg text-charcoal antialiased;
+  }
+}
+
+.max-container {
+  @apply max-w-[1240px] mx-auto px-6 md:px-12 lg:px-24 w-full;
+}
+
+.section-padding {
+  @apply py-20 md:py-32;
+}
+
+.btn-primary {
+  @apply bg-solar-gold hover:bg-solar-gold-hover text-charcoal font-semibold px-8 py-4 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md active:scale-95;
+}
+
+.btn-secondary {
+  @apply bg-white hover:bg-gray-50 text-charcoal border border-gray-200 font-semibold px-8 py-4 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md active:scale-95;
+}
+
+.card-shadow {
+  @apply shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-black/5;
+}

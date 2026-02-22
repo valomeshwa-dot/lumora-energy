@@ -1,0 +1,7 @@
+{
+  "name": "Lumora Energy",
+  "description": "Premium rooftop solar solutions for residential and commercial clients in India.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
