@@ -1,9 +1,18 @@
-import { motion, AnimatePresence } from "motion/react";
-import { Sun, Shield, Zap, ArrowRight, Menu, X, Phone, Mail, MapPin, Calculator, CheckCircle2, ChevronDown, ChevronUp, Info, Star } from "lucide-react";
+import { motion, AnimatePresence, useScroll, useSpring } from "motion/react";
+import { Sun, Shield, Zap, ArrowRight, Menu, X, Phone, Mail, MapPin, Calculator, CheckCircle2, ChevronDown, ChevronUp, Info, Star, Award, Users, Globe } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import React, { useState, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Cell } from 'recharts';
+import CountUp from 'react-countup';
+import { useInView } from 'react-intersection-observer';
+
+// Swiper imports
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+
 import aboutImage from "../assets/lumoraabout.jpg";
 import commercialServiceImage from "../assets/commercialservice.jpeg";
 import residentialServiceImage from "../assets/residentialservice.jpg";
@@ -20,6 +29,48 @@ import client4 from "../assets/clients/client4.png";
 import client5 from "../assets/clients/client5.png";
 import client6 from "../assets/clients/client6.png";
 import maintenanceImage from "../assets/maintenance.jpeg";
+
+// --- Custom Components ---
+
+const ScrollProgress = () => {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  return (
+    <motion.div
+      className="fixed top-0 left-0 right-0 h-1.5 bg-solar-gold origin-left z-[60]"
+      style={{ scaleX }}
+    />
+  );
+};
+
+const SectionReveal = ({ children, width = "100%" }: { children: React.ReactNode, width?: string }) => {
+  const [ref, inView] = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+  });
+
+  return (
+    <div ref={ref} style={{ position: "relative", width, overflow: "hidden" }}>
+      <motion.div
+        variants={{
+          hidden: { opacity: 0, y: 75 },
+          visible: { opacity: 1, y: 0 },
+        }}
+        initial="hidden"
+        animate={inView ? "visible" : "hidden"}
+        transition={{ duration: 0.5, delay: 0.25 }}
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+};
+
 
 // --- Components ---
 
@@ -215,44 +266,70 @@ const Footer = () => {
 const Home = () => {
   return (
     <main>
+      <ScrollProgress />
       {/* Hero Section */}
       <section className="relative min-h-[85vh] md:min-h-[90vh] flex items-center overflow-hidden pt-40 pb-20">
-        <div className="absolute inset-0 z-0 bg-charcoal">
+        <div className="absolute inset-0 z-0">
+          {/* Animated Gradient Background */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{
+              opacity: 1,
+              background: [
+                "radial-gradient(circle at 20% 20%, #0E1116 0%, #1a1e26 50%, #0E1116 100%)",
+                "radial-gradient(circle at 80% 80%, #1a1e26 0%, #0E1116 50%, #1a1e26 100%)",
+                "radial-gradient(circle at 20% 80%, #0E1116 0%, #1a1e26 50%, #0E1116 100%)",
+                "radial-gradient(circle at 80% 20%, #1a1e26 0%, #0E1116 50%, #1a1e26 100%)",
+              ]
+            }}
+            transition={{
+              duration: 15,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "linear"
+            }}
+            className="absolute inset-0 bg-charcoal"
+          />
           {/* Refined warm sunset gradient simulation */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_40%,#F4C430_0%,transparent_50%)] opacity-[0.15]"></div>
+          <motion.div
+            animate={{
+              opacity: [0.1, 0.2, 0.1],
+              scale: [1, 1.1, 1],
+            }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute inset-0 bg-[radial-gradient(circle_at_80%_40%,#F4C430_0%,transparent_50%)]"
+          />
           <div className="absolute inset-0 bg-gradient-to-r from-charcoal via-charcoal/40 to-transparent"></div>
           <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-charcoal to-transparent opacity-40"></div>
         </div>
 
         <div className="relative z-10 w-full max-w-[1240px] px-6 md:px-12 lg:px-24 ml-0 mr-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="flex flex-col items-start text-left"
-          >
-            <span className="text-solar-gold font-bold uppercase tracking-[0.2em] text-sm mb-[20px] block leading-none">
-              Premium Rooftop Solar Solutions for India
-            </span>
-            <h1 className="text-white text-5xl md:text-7xl font-extrabold leading-[1.05] mb-[28px] tracking-tight max-w-[900px]">
-              Engineered for <br />
-              Intelligent Solar Living
-            </h1>
-            <p className="text-gray-200 text-xl md:text-2xl font-light mb-[64px] leading-[1.6] max-w-[680px]">
-              High-performance rooftop solar systems built for long-term savings and uncompromising quality.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-5">
-              <Link to="/savings" className="btn-primary flex items-center justify-center gap-2 px-10 h-14">
-                <Calculator size={20} />
-                Calculate Your Savings
-              </Link>
-              <Link to="/contact" className="bg-transparent border border-white/40 text-white hover:bg-white hover:text-charcoal font-semibold px-10 py-4 rounded-lg transition-all duration-300 shadow-sm hover:shadow-lg active:scale-95 flex items-center justify-center h-14">
-                Book Free Solar Assessment
-              </Link>
+          <SectionReveal>
+            <div className="flex flex-col items-start text-left">
+              <span className="text-solar-gold font-bold uppercase tracking-[0.2em] text-sm mb-[20px] block leading-none">
+                Premium Rooftop Solar Solutions for India
+              </span>
+              <h1 className="text-white text-5xl md:text-7xl font-extrabold leading-[1.05] mb-[28px] tracking-tight max-w-[900px]">
+                Engineered for <br />
+                Intelligent Solar Living
+              </h1>
+              <p className="text-gray-200 text-xl md:text-2xl font-light mb-[64px] leading-[1.6] max-w-[680px]">
+                High-performance rooftop solar systems built for long-term savings and uncompromising quality.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-5">
+                <Link to="/savings" className="btn-primary flex items-center justify-center gap-2 px-10 h-14">
+                  <Calculator size={20} />
+                  Calculate Your Savings
+                </Link>
+                <Link to="/contact" className="bg-transparent border border-white/40 text-white hover:bg-white hover:text-charcoal font-semibold px-10 py-4 rounded-lg transition-all duration-300 shadow-sm hover:shadow-lg active:scale-95 flex items-center justify-center h-14">
+                  Book Free Solar Assessment
+                </Link>
+              </div>
             </div>
-          </motion.div>
+          </SectionReveal>
         </div>
       </section>
+
 
       {/* SECTION 1 — TRUST INDICATORS STRIP */}
       <section className="relative z-20 mt-[120px]">
@@ -278,14 +355,18 @@ const Home = () => {
             ].map((item, idx) => (
               <motion.div
                 key={idx}
-                whileHover={{ y: -5 }}
+                whileHover={{
+                  y: -10,
+                  scale: 1.02,
+                  boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                }}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="bg-white p-8 rounded-xl card-shadow flex flex-col items-start gap-4"
+                className="bg-white p-8 rounded-xl card-shadow flex flex-col items-start gap-4 cursor-default transition-all duration-300"
               >
-                <div className="text-charcoal">{item.icon}</div>
+                <div className="text-solar-gold p-3 bg-solar-gold/10 rounded-lg">{item.icon}</div>
                 <h3 className="text-charcoal font-bold text-sm uppercase tracking-wider leading-tight">
                   {item.title}
                 </h3>
@@ -298,60 +379,56 @@ const Home = () => {
       {/* SECTION 2 — SOCIAL PROOF STATISTICS */}
       <section className="section-padding bg-white">
         <div className="max-container">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 text-center">
-            {[
-              { value: "5000+", label: "Installations Completed" },
-              { value: "10+", label: "Years Industry Experience" },
-              { value: "100 MW+", label: "Installed Capacity" },
-              { value: "1M+", label: "Tons CO₂ Emissions Offset" },
-            ].map((stat, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-              >
-                <div className="text-charcoal font-extrabold text-5xl md:text-6xl mb-3">
-                  {stat.value}
+          <SectionReveal>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 text-center">
+              {[
+                { value: 5000, suffix: "+", label: "Installations Completed" },
+                { value: 10, suffix: "+", label: "Years Industry Experience" },
+                { value: 100, suffix: " MW+", label: "Installed Capacity" },
+                { value: 1, suffix: "M+", label: "Tons CO₂ Emissions Offset" },
+              ].map((stat, idx) => (
+                <div key={idx} className="group">
+                  <div className="text-charcoal font-extrabold text-5xl md:text-6xl mb-3 flex items-center justify-center">
+                    <CountUp end={stat.value} duration={2.5} enableScrollSpy scrollSpyOnce />
+                    <span>{stat.suffix}</span>
+                  </div>
+                  <div className="text-steel-grey font-medium uppercase tracking-widest text-xs group-hover:text-solar-gold transition-colors">
+                    {stat.label}
+                  </div>
                 </div>
-                <div className="text-steel-grey font-medium uppercase tracking-widest text-xs">
-                  {stat.label}
-                </div>
-              </motion.div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </SectionReveal>
         </div>
       </section>
 
       {/* SECTION 3 — MINI CREDIBILITY CTA */}
       <section className="py-20 bg-main-bg border-y border-gray-100">
         <div className="max-container text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <SectionReveal>
             <h2 className="text-2xl md:text-3xl font-bold text-charcoal mb-10 max-w-2xl mx-auto">
               Trusted by Thousands of Homeowners and Businesses Across India
             </h2>
             <Link to="/contact" className="btn-primary inline-block">
               Book Free Solar Assessment
             </Link>
-          </motion.div>
+          </SectionReveal>
         </div>
       </section>
+
 
       {/* Services Preview */}
       <section className="section-padding bg-main-bg">
         <div className="max-container">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-extrabold mb-6">TAILORED SOLUTIONS</h2>
-            <div className="w-20 h-1.5 bg-solar-gold mx-auto mb-8"></div>
-            <p className="text-steel-grey text-lg max-w-2xl mx-auto">
-              We provide end-to-end solar engineering for every rooftop, from luxury residences to industrial complexes.
-            </p>
-          </div>
+          <SectionReveal>
+            <div className="text-center mb-20">
+              <h2 className="text-4xl md:text-5xl font-extrabold mb-6">TAILORED SOLUTIONS</h2>
+              <div className="w-20 h-1.5 bg-solar-gold mx-auto mb-8"></div>
+              <p className="text-steel-grey text-lg max-w-2xl mx-auto">
+                We provide end-to-end solar engineering for every rooftop, from luxury residences to industrial complexes.
+              </p>
+            </div>
+          </SectionReveal>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
@@ -377,22 +454,27 @@ const Home = () => {
               <motion.div
                 key={idx}
                 whileHover={{ y: -10 }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
                 className="bg-white rounded-xl overflow-hidden card-shadow group"
               >
-                <div className="h-48 overflow-hidden">
+                <div className="h-48 overflow-hidden relative">
+                  <div className="absolute inset-0 bg-solar-gold/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
                   <img
                     src={service.img}
                     alt={service.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     referrerPolicy="no-referrer"
                   />
                 </div>
                 <div className="p-8">
-                  <div className="text-solar-gold mb-4">{service.icon}</div>
+                  <div className="text-solar-gold mb-4 group-hover:scale-110 transition-transform duration-300 origin-left">{service.icon}</div>
                   <h3 className="text-2xl font-bold mb-4">{service.title}</h3>
                   <p className="text-steel-grey mb-6 leading-relaxed">{service.desc}</p>
-                  <Link to="/services" className="text-charcoal font-bold flex items-center gap-2 hover:text-solar-gold transition-colors">
-                    LEARN MORE <ArrowRight size={18} />
+                  <Link to="/services" className="text-charcoal font-bold flex items-center gap-2 hover:text-solar-gold transition-colors group/btn">
+                    LEARN MORE <ArrowRight size={18} className="group-hover/btn:translate-x-2 transition-transform duration-300" />
                   </Link>
                 </div>
               </motion.div>
@@ -401,20 +483,97 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-charcoal py-24 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-solar-gold/5 skew-x-12 transform translate-x-1/2"></div>
-        <div className="max-container relative z-10 text-center">
-          <h2 className="text-white text-4xl md:text-6xl font-extrabold mb-8">READY FOR SOLAR ENERGY?</h2>
-          <p className="text-gray-400 text-xl mb-12 max-w-2xl mx-auto">
-            Join thousands of Indian families and businesses making the switch to clean, affordable power.
-          </p>
-          <Link to="/contact" className="btn-primary text-lg px-12">
-            BOOK YOUR FREE SOLAR ASSESSMENT
-          </Link>
-          <p className="text-gray-500 mt-6 text-sm italic">Limited slots available daily.</p>
+      {/* Testimonials Slider */}
+      <section className="section-padding bg-white overflow-hidden">
+        <div className="max-container">
+          <SectionReveal>
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-extrabold mb-6">CLIENT SUCCESS STORIES</h2>
+              <div className="w-20 h-1.5 bg-solar-gold mx-auto"></div>
+            </div>
+          </SectionReveal>
+
+          <Swiper
+            modules={[Autoplay, Pagination]}
+            spaceBetween={30}
+            slidesPerView={1}
+            autoplay={{ delay: 5000, disableOnInteraction: false }}
+            pagination={{ clickable: true }}
+            breakpoints={{
+              768: { slidesPerView: 2 },
+              1024: { slidesPerView: 3 },
+            }}
+            className="pb-16"
+          >
+            {[
+              {
+                name: "Rahul Sharma",
+                role: "Homeowner, Gurgaon",
+                text: "Lumora Energy transformed my villa with a sleek solar setup. My electricity bills have dropped by 80% and the monitoring app is incredibly intuitive.",
+                rating: 5
+              },
+              {
+                name: "Anita Desai",
+                role: "MD, Desai Textiles",
+                text: "Switching to solar for our factory was a big decision. Lumora made it seamless. The ROI has been better than projected.",
+                rating: 5
+              },
+              {
+                name: "Vikram Mehta",
+                role: "Apartment Owner, Mumbai",
+                text: "The architectural integration is stunning. It doesn't just provide energy; it actually adds to the premium feel of the property.",
+                rating: 5
+              },
+              {
+                name: "Sanjay Gupta",
+                role: "Hotelier, Jaipur",
+                text: "Excellent service from start to finish. The team handled all the paperwork and subsidies efficiently. Highly recommended.",
+                rating: 5
+              }
+            ].map((t, i) => (
+              <SwiperSlide key={i}>
+                <div className="bg-main-bg p-10 rounded-2xl h-full flex flex-col border border-gray-100">
+                  <div className="flex gap-1 mb-6">
+                    {[...Array(t.rating)].map((_, i) => (
+                      <Star key={i} size={18} className="fill-solar-gold text-solar-gold" />
+                    ))}
+                  </div>
+                  <p className="text-steel-grey italic mb-8 flex-grow">"{t.text}"</p>
+                  <div>
+                    <h4 className="font-bold text-lg">{t.name}</h4>
+                    <p className="text-sm text-gray-400">{t.role}</p>
+                  </div>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
       </section>
+
+      {/* CTA Section */}
+      <section className="bg-charcoal py-24 relative overflow-hidden">
+        <motion.div
+          animate={{
+            opacity: [0.05, 0.1, 0.05],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-0 right-0 w-1/3 h-full bg-solar-gold skew-x-12 transform translate-x-1/2"
+        ></motion.div>
+        <div className="max-container relative z-10 text-center">
+          <SectionReveal>
+            <h2 className="text-white text-4xl md:text-6xl font-extrabold mb-8">READY FOR SOLAR ENERGY?</h2>
+            <p className="text-gray-400 text-xl mb-12 max-w-2xl mx-auto">
+              Join thousands of Indian families and businesses making the switch to clean, affordable power.
+            </p>
+            <Link to="/contact" className="btn-primary text-lg px-12 inline-block">
+              BOOK YOUR FREE SOLAR ASSESSMENT
+            </Link>
+            <p className="text-gray-500 mt-6 text-sm italic">Limited slots available daily.</p>
+          </SectionReveal>
+        </div>
+      </section>
+
     </main>
   );
 };
@@ -795,71 +954,89 @@ const SolarSavings = () => {
                     exit={{ opacity: 0, y: -20 }}
                     className="space-y-8"
                   >
-                    {/* Main Result Card */}
-                    <div className="bg-white p-8 md:p-10 rounded-2xl card-shadow">
-                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-                        <div>
-                          <h3 className="text-sm font-bold uppercase tracking-widest text-steel-grey mb-1">Recommended System</h3>
-                          <p className="text-4xl font-black text-charcoal">{results.systemSize} kW Solar Plant</p>
-                          {results.isOversized && (
-                            <p className="text-xs text-solar-gold font-bold mt-2">Slightly oversized to ensure seasonal reliability.</p>
-                          )}
-                        </div>
-                        <div className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider ${getInvestmentBadge(results.payback).color}`}>
-                          {getInvestmentBadge(results.payback).label}
-                        </div>
-                      </div>
-
-                      {/* Financial Summary Layout */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-                        {/* Left Column - Operational Savings */}
-                        <div className="space-y-6 p-8 bg-main-bg rounded-xl border-l-4 border-gray-200">
+                    <SectionReveal>
+                      {/* Main Result Card */}
+                      <div className="bg-white p-8 md:p-10 rounded-2xl card-shadow">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
                           <div>
-                            <p className="text-xs font-bold uppercase text-steel-grey mb-1">Monthly Savings</p>
-                            <p className="text-2xl font-bold text-charcoal">{formatCurrency(results.monthlySavings)}</p>
+                            <h3 className="text-sm font-bold uppercase tracking-widest text-steel-grey mb-1">Recommended System</h3>
+                            <div className="text-4xl font-black text-charcoal flex items-center gap-2">
+                              <CountUp end={results.systemSize} decimals={1} duration={1.5} />
+                              <span>kW Solar Plant</span>
+                            </div>
+                            {results.isOversized && (
+                              <p className="text-xs text-solar-gold font-bold mt-2">Slightly oversized to ensure seasonal reliability.</p>
+                            )}
                           </div>
-                          <div>
-                            <p className="text-xs font-bold uppercase text-steel-grey mb-1">Annual Savings</p>
-                            <p className="text-2xl font-bold text-charcoal">{formatCurrency(results.annualSavings)}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold uppercase text-steel-grey mb-1">Payback Period</p>
-                            <p className="text-2xl font-bold text-charcoal">{results.payback} Years</p>
+                          <div className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider ${getInvestmentBadge(results.payback).color}`}>
+                            {getInvestmentBadge(results.payback).label}
                           </div>
                         </div>
 
-                        {/* Right Column - Investment Summary */}
-                        <div className="space-y-6 p-8 bg-solar-gold/5 rounded-xl border-l-4 border-solar-gold">
-                          <div>
-                            <p className="text-xs font-bold uppercase text-charcoal/60 mb-1">Installation Cost</p>
-                            <p className="text-xl font-bold text-charcoal opacity-60">{formatCurrency(results.installationCost)}</p>
+                        {/* Financial Summary Layout */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                          {/* Left Column - Operational Savings */}
+                          <div className="space-y-6 p-8 bg-main-bg rounded-xl border-l-4 border-gray-200">
+                            <div>
+                              <p className="text-xs font-bold uppercase text-steel-grey mb-1">Monthly Savings</p>
+                              <div className="text-2xl font-bold text-charcoal">
+                                ₹<CountUp end={results.monthlySavings} duration={1.5} separator="," />
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold uppercase text-steel-grey mb-1">Annual Savings</p>
+                              <div className="text-2xl font-bold text-charcoal">
+                                ₹<CountUp end={results.annualSavings} duration={1.5} separator="," />
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold uppercase text-steel-grey mb-1">Payback Period</p>
+                              <div className="text-2xl font-bold text-charcoal">
+                                <CountUp end={results.payback} decimals={1} duration={1.5} /> Years
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-xs font-bold uppercase text-charcoal/60 mb-1">Government Subsidy</p>
-                            <p className="text-xl font-bold text-emerald-600">-{formatCurrency(results.subsidy)}</p>
-                          </div>
-                          <div className="pt-4 border-t border-solar-gold/20">
-                            <p className="text-xs font-bold uppercase text-charcoal/60 mb-1">Final System Cost</p>
-                            <p className="text-4xl font-black text-charcoal">{formatCurrency(results.finalCost)}</p>
+
+                          {/* Right Column - Investment Summary */}
+                          <div className="space-y-6 p-8 bg-solar-gold/5 rounded-xl border-l-4 border-solar-gold">
+                            <div>
+                              <p className="text-xs font-bold uppercase text-charcoal/60 mb-1">Installation Cost</p>
+                              <div className="text-xl font-bold text-charcoal opacity-60">
+                                ₹<CountUp end={results.installationCost} duration={1} separator="," />
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold uppercase text-charcoal/60 mb-1">Government Subsidy</p>
+                              <div className="text-xl font-bold text-emerald-600">
+                                -₹<CountUp end={results.subsidy} duration={1} separator="," />
+                              </div>
+                            </div>
+                            <div className="pt-4 border-t border-solar-gold/20">
+                              <p className="text-xs font-bold uppercase text-charcoal/60 mb-1">Final System Cost</p>
+                              <div className="text-4xl font-black text-charcoal">
+                                ₹<CountUp end={results.finalCost} duration={2} separator="," />
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Large Highlighted Savings Statement */}
-                      <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-8 text-center mb-0">
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700 mb-2">25-Year Net Savings</p>
-                        <p className="text-5xl font-black text-emerald-600 mb-2">
-                          {formatCurrency(results.netSavings25)}
-                        </p>
-                        <p className="text-sm text-emerald-700/70 font-medium">
-                          Estimated cumulative savings over 25 years after system cost.
-                        </p>
+                        {/* Large Highlighted Savings Statement */}
+                        <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-8 text-center mb-0">
+                          <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700 mb-2">25-Year Net Savings</p>
+                          <div className="text-5xl font-black text-emerald-600 mb-2">
+                            ₹<CountUp end={results.netSavings25} duration={3} separator="," />
+                          </div>
+                          <p className="text-sm text-emerald-700/70 font-medium">
+                            Estimated cumulative savings over 25 years after system cost.
+                          </p>
+                        </div>
                       </div>
-                    </div>
+                    </SectionReveal>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
+
           </div>
 
           {/* Transparency Section */}
