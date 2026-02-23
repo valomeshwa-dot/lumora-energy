@@ -268,67 +268,132 @@ const Home = () => {
     <main>
       <ScrollProgress />
       {/* Hero Section */}
-      <section className="relative min-h-[85vh] md:min-h-[90vh] flex items-center overflow-hidden pt-40 pb-20">
+      <section className="relative min-h-screen flex items-center overflow-hidden pt-32 pb-20">
+        {/* Background Layer */}
         <div className="absolute inset-0 z-0">
-          {/* Animated Gradient Background */}
+          <div className="absolute inset-0 bg-[#05070a]"></div>
+          {/* Deeper navy to charcoal radial gradient */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{
               opacity: 1,
-              background: [
-                "radial-gradient(circle at 20% 20%, #0E1116 0%, #1a1e26 50%, #0E1116 100%)",
-                "radial-gradient(circle at 80% 80%, #1a1e26 0%, #0E1116 50%, #1a1e26 100%)",
-                "radial-gradient(circle at 20% 80%, #0E1116 0%, #1a1e26 50%, #0E1116 100%)",
-                "radial-gradient(circle at 80% 20%, #1a1e26 0%, #0E1116 50%, #1a1e26 100%)",
-              ]
+              background: "radial-gradient(circle at 50% 50%, #1a1e26 0%, #0E1116 100%)"
             }}
-            transition={{
-              duration: 15,
-              repeat: Infinity,
-              repeatType: "reverse",
-              ease: "linear"
-            }}
-            className="absolute inset-0 bg-charcoal"
+            className="absolute inset-0"
           />
-          {/* Refined warm sunset gradient simulation */}
+
+          {/* Large Faded Background Typography */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+            <motion.span
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
+              className="text-[30vw] md:text-[25vw] font-black text-white/[0.05] leading-none uppercase tracking-tighter"
+            >
+              SOLAR
+            </motion.span>
+          </div>
+
+          {/* Subtle radial glow */}
           <motion.div
             animate={{
               opacity: [0.1, 0.2, 0.1],
-              scale: [1, 1.1, 1],
+              scale: [1, 1.2, 1],
             }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute inset-0 bg-[radial-gradient(circle_at_80%_40%,#F4C430_0%,transparent_50%)]"
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-solar-gold/10 rounded-full blur-[120px]"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-charcoal via-charcoal/40 to-transparent"></div>
-          <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-charcoal to-transparent opacity-40"></div>
         </div>
 
-        <div className="relative z-10 w-full max-w-[1240px] px-6 md:px-12 lg:px-24 ml-0 mr-auto">
-          <SectionReveal>
-            <div className="flex flex-col items-start text-left">
-              <span className="text-solar-gold font-bold uppercase tracking-[0.2em] text-sm mb-[20px] block leading-none">
+        <div className="relative z-10 max-container">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+            {/* Left Content */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="flex flex-col items-start text-left"
+            >
+              <motion.span
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="text-solar-gold font-bold uppercase tracking-[0.3em] text-xs mb-6 px-4 py-2 bg-solar-gold/10 rounded-full border border-solar-gold/20"
+              >
                 Premium Rooftop Solar Solutions for India
-              </span>
-              <h1 className="text-white text-5xl md:text-7xl font-extrabold leading-[1.05] mb-[28px] tracking-tight max-w-[900px]">
+              </motion.span>
+              <h1 className="text-white text-5xl md:text-7xl font-extrabold leading-[1.1] mb-8 tracking-tight">
                 Engineered for <br />
-                Intelligent Solar Living
+                <span className="text-solar-gold">Intelligent</span> <br />
+                Solar Living
               </h1>
-              <p className="text-gray-200 text-xl md:text-2xl font-light mb-[64px] leading-[1.6] max-w-[680px]">
+              <p className="text-gray-400 text-lg md:text-xl font-light mb-12 leading-relaxed max-w-[540px]">
                 High-performance rooftop solar systems built for long-term savings and uncompromising quality.
               </p>
-              <div className="flex flex-col sm:flex-row gap-5">
-                <Link to="/savings" className="btn-primary flex items-center justify-center gap-2 px-10 h-14">
-                  <Calculator size={20} />
-                  Calculate Your Savings
+              <div className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto">
+                <Link
+                  to="/savings"
+                  className="btn-primary flex items-center justify-center gap-3 px-10 h-16 text-lg hover:shadow-[0_0_20px_rgba(244,196,48,0.4)] transition-all duration-300"
+                >
+                  <Calculator size={22} />
+                  Calculate Savings
                 </Link>
-                <Link to="/contact" className="bg-transparent border border-white/40 text-white hover:bg-white hover:text-charcoal font-semibold px-10 py-4 rounded-lg transition-all duration-300 shadow-sm hover:shadow-lg active:scale-95 flex items-center justify-center h-14">
-                  Book Free Solar Assessment
+                <Link
+                  to="/contact"
+                  className="group relative px-10 h-16 flex items-center justify-center text-white font-bold text-lg rounded-lg border border-white/20 overflow-hidden transition-all duration-300 hover:border-white/40"
+                >
+                  <div className="absolute inset-0 bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                  <span className="relative z-10">Get a Quote</span>
                 </Link>
               </div>
-            </div>
-          </SectionReveal>
+            </motion.div>
+
+            {/* Right Image Content */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+              className="relative"
+            >
+              <div className="relative group">
+                {/* Subtle Radial Glow */}
+                <div className="absolute -inset-10 bg-solar-gold/10 rounded-full blur-[100px] opacity-100 group-hover:bg-solar-gold/20 transition-all duration-700 pointer-events-none"></div>
+
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.5 }}
+                  className="relative rounded-2xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.6)] border border-white/10 z-10"
+                >
+                  <img
+                    src="/solar-home.jpg"
+                    alt="Rooftop solar powered home"
+                    className="w-full h-auto aspect-[4/3] object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal/40 to-transparent"></div>
+                </motion.div>
+
+                {/* Efficiency Badge */}
+                <motion.div
+                  animate={{ y: [0, -15, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute -bottom-6 -left-6 md:-left-12 backdrop-blur-md bg-white/10 border border-white/20 rounded-xl p-6 shadow-2xl z-20"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="bg-solar-gold/20 p-2.5 rounded-lg">
+                      <Zap className="text-solar-gold" size={24} />
+                    </div>
+                    <div>
+                      <p className="text-white font-extrabold text-3xl leading-none">92%</p>
+                      <p className="text-white/60 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">Efficiency</p>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
+
 
 
       {/* SECTION 1 — TRUST INDICATORS STRIP */}
