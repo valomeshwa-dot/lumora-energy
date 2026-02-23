@@ -636,9 +636,8 @@ const SolarSavings = () => {
           }
         ]);
 
-      if (error) {
-        console.error("Error saving calculator log:", error);
-      }
+      // Silent fail in production or handle via proper logging service
+
     };
 
     // Simulate calculation delay for premium feel
@@ -926,131 +925,165 @@ const SolarSavings = () => {
   );
 };
 
+interface Project {
+  id: string;
+  title: string;
+  location: string;
+  capacity_kw: number;
+  image_url: string;
+  client_name: string;
+  client_image: string | null;
+  review: string;
+}
+
 const Projects = () => {
-  const projects = [
-    {
-      title: "3kW Residential Solar",
-      location: "Mumbai",
-      savings: "₹55,000/year",
-      client: "Rajesh Sharma",
-      review: "“The installation was smooth and our electricity bill has reduced drastically. Very professional team.”",
-      img: project1,
-      clientImg: client1,
-    },
-    {
-      title: "5kW Residential Solar",
-      location: "Pune",
-      savings: "₹85,000/year",
-      client: "Priya Mehta",
-      review: "“Lumora handled everything from subsidy to installation. Highly recommended.”",
-      img: project2,
-      clientImg: client2,
-    },
-    {
-      title: "10kW Commercial Installation",
-      location: "Bangalore",
-      savings: "₹1.8L/year",
-      client: "Arvind Enterprises",
-      review: "“Excellent ROI and seamless execution. The team was punctual and efficient.”",
-      img: project3,
-      clientImg: client3,
-    },
-    {
-      title: "20kW Commercial Rooftop",
-      location: "Ahmedabad",
-      savings: "₹3.5L/year",
-      client: "Patel Industries",
-      review: "“Professional engineering and clean installation. Great support even after completion.”",
-      img: project4,
-      clientImg: client4,
-    },
-    {
-      title: "50kW Industrial Plant",
-      location: "Surat",
-      savings: "₹9L/year",
-      client: "Kiran Textiles",
-      review: "“Massive savings and quick payback period. Highly satisfied with Lumora.”",
-      img: project5,
-      clientImg: client5,
-    },
-    {
-      title: "100kW Factory Installation",
-      location: "Delhi NCR",
-      savings: "₹18L/year",
-      client: "Mahadev Manufacturing",
-      review: "“Top quality components and flawless execution. Would definitely work with them again.”",
-      img: project6,
-      clientImg: client6,
-    },
-  ];
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("projects")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        setProjects(data || []);
+      } catch (err: any) {
+        console.error("Fetch projects error:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="pt-40 pb-20 flex flex-col items-center justify-center bg-main-bg min-h-screen">
+        <div className="flex items-center gap-3 text-solar-gold animate-pulse">
+          <Zap className="animate-bounce" />
+          <span className="text-2xl font-black tracking-widest uppercase">Charging Portfolio...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="pt-40 pb-20 flex flex-col items-center justify-center bg-main-bg min-h-screen px-4 text-center">
+        <div className="text-red-500 font-bold mb-4">Error loading projects: {error}</div>
+        <button
+          onClick={() => window.location.reload()}
+          className="bg-solar-gold text-black px-8 py-3 rounded-full font-bold hover:bg-yellow-500 transition-all uppercase tracking-widest text-sm"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <main className="pt-32 bg-main-bg min-h-screen pb-20">
       <section className="section-padding">
-        <div className="max-container">
+        <div className="max-container px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-6xl font-extrabold mb-4 uppercase tracking-tight">Our Portfolio</h2>
             <p className="text-solar-gold font-bold text-lg md:text-xl mb-6">Recent Rooftop Solar Installations Across India</p>
             <div className="w-24 h-1.5 bg-solar-gold mx-auto"></div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-12">
-            {projects.map((project, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                whileHover={{ y: -12 }}
-                className="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 flex flex-col group h-full"
-              >
-                {/* Project Image */}
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    src={project.img}
-                    alt={project.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute top-4 right-4 bg-solar-gold text-charcoal text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg">
-                    {project.location}
-                  </div>
-                </div>
+          {(!projects || projects.length === 0) ? (
+            <div className="text-center py-20">
+              <div className="bg-white/5 inline-block p-10 rounded-3xl border border-white/5">
+                <p className="text-gray-400 font-medium text-lg">No projects found. Check back soon for our latest updates.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-12">
+              {projects.map((project, idx) => {
+                // Safeguard against missing capacity_kw
+                const capacity = project?.capacity_kw || 0;
+                const annualSavings = (capacity * 17000).toLocaleString('en-IN');
 
-                {/* Content */}
-                <div className="p-8 flex flex-col flex-grow">
-                  <h3 className="text-2xl font-bold text-charcoal mb-2 leading-tight">{project.title}</h3>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Zap size={16} className="text-solar-gold fill-solar-gold" />
-                    <span className="text-charcoal font-black text-sm uppercase tracking-wider underline decoration-solar-gold decoration-4 underline-offset-4">
-                      Savings: {project.savings}
-                    </span>
-                  </div>
+                return (
+                  <motion.div
+                    key={project?.id || idx}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.1 }}
+                    whileHover={{ y: -12 }}
+                    className="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 flex flex-col group h-full border border-gray-100/50"
+                  >
+                    {/* Project Image & Location Badge */}
+                    <div className="relative h-64 overflow-hidden bg-gray-100">
+                      {project?.image_url ? (
+                        <img
+                          src={project.image_url}
+                          alt={project?.title || "Project"}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-300">
+                          <Zap className="w-12 h-12" />
+                        </div>
+                      )}
+                      {project?.location && (
+                        <div className="absolute top-4 right-4 bg-solar-gold text-charcoal text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg">
+                          {project.location}
+                        </div>
+                      )}
+                    </div>
 
-                  {/* Client & Review */}
-                  <div className="mt-4 pt-6 border-t border-gray-100 flex-grow">
-                    <div className="flex items-center gap-1 mb-3">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={16} className="text-solar-gold fill-solar-gold" />
-                      ))}
-                    </div>
-                    <p className="text-steel-grey italic text-sm leading-relaxed mb-6 font-medium">
-                      {project.review}
-                    </p>
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-main-bg border-2 border-solar-gold/20 overflow-hidden">
-                        <img src={project.clientImg} alt={project.client} className="w-full h-full object-cover" />
+                    {/* Content */}
+                    <div className="p-8 flex flex-col flex-grow text-left">
+                      <h3 className="text-2xl font-bold text-charcoal mb-2 leading-tight">{project?.title || "Solar Project"}</h3>
+                      <div className="flex items-center gap-2 mb-4">
+                        <Zap size={16} className="text-solar-gold fill-solar-gold" />
+                        <span className="text-charcoal font-black text-sm uppercase tracking-wider underline decoration-solar-gold decoration-4 underline-offset-4">
+                          ⚡ SAVINGS: ₹{annualSavings}/YEAR
+                        </span>
                       </div>
-                      <div>
-                        <p className="text-charcoal font-bold text-sm leading-none">{project.client}</p>
-                        <p className="text-gray-400 text-[10px] font-bold uppercase tracking-tighter mt-1">Verified Client</p>
+
+                      {/* Client Review Section */}
+                      <div className="mt-4 pt-6 border-t border-gray-100 flex-grow">
+                        <div className="flex items-center gap-0.5 mb-3">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} size={16} className="text-solar-gold fill-solar-gold" />
+                          ))}
+                        </div>
+
+                        <p className="text-steel-grey italic text-sm leading-relaxed mb-6 font-medium line-clamp-3">
+                          "{project?.review ?? "Providing clean energy and massive savings to our valued clients."}"
+                        </p>
+
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-solar-gold/10 border-2 border-solar-gold/20 flex items-center justify-center overflow-hidden flex-shrink-0">
+                            {project?.client_image ? (
+                              <img src={project.client_image} alt={project?.client_name || "Client"} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                            ) : (
+                              <span className="text-solar-gold font-black text-sm uppercase">
+                                {project?.client_name ? project.client_name.charAt(0) : "C"}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex flex-col">
+                            <p className="text-charcoal font-bold text-sm leading-none mb-1">{project?.client_name || "Lumora Client"}</p>
+                            <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Verified Client</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
     </main>

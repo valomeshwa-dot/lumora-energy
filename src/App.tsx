@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate, Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabase";
 import { Session } from "@supabase/supabase-js";
 import { Navbar, Footer, Home, About, Services, SolarSavings, Projects, Contact } from "./components/Lumora";
 import Auth from "./pages/Auth";
+import Admin from "./pages/Admin";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -19,6 +20,17 @@ function ScrollToTop() {
 
   return null;
 }
+
+// Layout for Public Pages (with Navbar and Footer)
+const PublicLayout = ({ session }: { session: Session | null }) => (
+  <div className="flex flex-col min-h-screen">
+    {session && <Navbar />}
+    <div className="flex-grow">
+      <Outlet />
+    </div>
+    {session && <Footer />}
+  </div>
+);
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -50,24 +62,24 @@ export default function App() {
   return (
     <Router>
       <ScrollToTop />
-      <div className="flex flex-col min-h-screen">
-        {session && <Navbar />}
-        <div className="flex-grow">
-          <Routes>
-            <Route
-              path="/auth"
-              element={!session ? <Auth /> : <Navigate to="/" replace />}
-            />
-            <Route path="/" element={session ? <Home /> : <Navigate to="/auth" replace />} />
-            <Route path="/about" element={session ? <About /> : <Navigate to="/auth" replace />} />
-            <Route path="/services" element={session ? <Services /> : <Navigate to="/auth" replace />} />
-            <Route path="/savings" element={session ? <SolarSavings /> : <Navigate to="/auth" replace />} />
-            <Route path="/projects" element={session ? <Projects /> : <Navigate to="/auth" replace />} />
-            <Route path="/contact" element={session ? <Contact /> : <Navigate to="/auth" replace />} />
-          </Routes>
-        </div>
-        {session && <Footer />}
-      </div>
+      <Routes>
+        {/* Admin route is completely isolated */}
+        <Route path="/admin" element={<Admin />} />
+
+        {/* Public routes wrapped in PublicLayout */}
+        <Route element={<PublicLayout session={session} />}>
+          <Route
+            path="/auth"
+            element={!session ? <Auth /> : <Navigate to="/" replace />}
+          />
+          <Route path="/" element={session ? <Home /> : <Navigate to="/auth" replace />} />
+          <Route path="/about" element={session ? <About /> : <Navigate to="/auth" replace />} />
+          <Route path="/services" element={session ? <Services /> : <Navigate to="/auth" replace />} />
+          <Route path="/savings" element={session ? <SolarSavings /> : <Navigate to="/auth" replace />} />
+          <Route path="/projects" element={session ? <Projects /> : <Navigate to="/auth" replace />} />
+          <Route path="/contact" element={session ? <Contact /> : <Navigate to="/auth" replace />} />
+        </Route>
+      </Routes>
     </Router>
   );
 }
